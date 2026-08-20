@@ -1,4 +1,2 @@
-gradio
-transformers
-torch
-accelerate
+gradio>=4.19.0
+huggingface_hub>=0.20.0
