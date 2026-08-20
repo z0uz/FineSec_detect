@@ -1,0 +1,32 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments & secrets
+.env
+.venv
+env/
+venv/
+*.pem
+*.key
+
+# Dataset files & parquet binaries
+*.parquet
+*.jsonl
+data/
+
+# Fine-tuned model checkpoints & weights
+fine-sec-7b-model/
+*.bin
+*.safetensors
+*.gguf
+*.pt
+*.onnx
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# System / OS files
+.DS_Store
+Thumbs.db
