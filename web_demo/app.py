@@ -4,33 +4,40 @@ import gradio as gr
 from huggingface_hub import InferenceClient
 
 MODEL_NAME = "elsiddik/finsec_detector"
-client = InferenceClient(model=MODEL_NAME)
+client = InferenceClient(model=MODEL_NAME, timeout=60)
 
 SYSTEM_PROMPT = (
     "You are FineSec-AI, an expert Application Security Engineer. "
-    "Analyze code snippet or security report for vulnerabilities and output JSON report with fields: "
+    "Analyze code snippet for vulnerabilities and output JSON report with fields: "
     "'is_vulnerable', 'cwe', 'vulnerability_type', 'severity', 'vulnerable_lines', 'explanation', 'remediation', 'fixed_code'."
 )
 
-def audit_code(code_text):
+def audit_code(code_text, progress=gr.Progress()):
     if not code_text or not code_text.strip():
         return "Please enter a code snippet to analyze.", {}
 
+    progress(0.2, desc="Sending code to FineSec-AI Security Engine...")
+
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": f"Analyze this code for security vulnerabilities:\n```\n{code_text}\n```"}
+        {"role": "user", "content": f"Analyze this code for vulnerabilities:\n```\n{code_text[:1500]}\n```"}
     ]
     
+    progress(0.5, desc="Analyzing security controls & generating fix diffs...")
+
     try:
-        response = client.chat_completion(messages=messages, max_tokens=512)
+        response = client.chat_completion(messages=messages, max_tokens=350, temperature=0.1)
         raw_response = response.choices[0].message.content.strip()
     except Exception as e:
+        # Fast fallback to Qwen base if specific adapter is cold-starting
         try:
-            fallback = InferenceClient(model="Qwen/Qwen2.5-Coder-7B-Instruct")
-            response = fallback.chat_completion(messages=messages, max_tokens=512)
+            fallback = InferenceClient(model="Qwen/Qwen2.5-Coder-7B-Instruct", timeout=30)
+            response = fallback.chat_completion(messages=messages, max_tokens=350, temperature=0.1)
             raw_response = response.choices[0].message.content.strip()
         except Exception as ex:
-            return f"Model is initializing on Hugging Face Serverless API. Please retry in 30 seconds. ({str(ex)})", {}
+            return f"Notice: Model server is warming up on Hugging Face infrastructure. Please click Audit Code again in 10 seconds. ({str(ex)})", {}
+
+    progress(0.9, desc="Formatting JSON audit report...")
 
     # Parse JSON
     try:
@@ -44,9 +51,9 @@ def audit_code(code_text):
         report = {"raw_output": raw_response}
 
     if report.get("is_vulnerable") is True:
-        status = f"🔴 VULNERABLE ({report.get('severity', 'HIGH')} - {report.get('cwe', 'CWE')})"
+        status = f"VULNERABLE ({report.get('severity', 'HIGH')} - {report.get('cwe', 'CWE')})"
     else:
-        status = "🟢 SAFE (No high-risk vulnerabilities detected)"
+        status = "SAFE (No high-risk vulnerabilities detected)"
 
     summary = f"""### Audit Summary: {status}
 **Type**: {report.get('vulnerability_type', 'N/A')}
@@ -69,13 +76,13 @@ EXAMPLES = [
 ]
 
 with gr.Blocks(title="FineSec Security Auditor") as demo:
-    gr.Markdown("# 🛡️ FineSec Security Auditor (elsiddik/finsec_detector)")
+    gr.Markdown("# FineSec Security Auditor (elsiddik/finsec_detector)")
     gr.Markdown("An AI-powered Application Security Auditor fine-tuned on CVE benchmarks and secure code repair patterns.")
 
     with gr.Row():
         with gr.Column():
             code_input = gr.Code(label="Input Source Code", language="python", lines=12)
-            submit_btn = gr.Button("🔍 Audit Code", variant="primary")
+            submit_btn = gr.Button("Audit Code", variant="primary")
             gr.Examples(examples=EXAMPLES, inputs=[code_input])
 
         with gr.Column():
