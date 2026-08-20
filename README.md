@@ -16,15 +16,40 @@
 
 ---
 
-## Overview
+## About the Project & Mission
 
-**FineSec-AI** is a 7-Billion parameter specialized cybersecurity Large Language Model fine-tuned on **1,000,000 high-precision security records**, NVD CVE vulnerability advisories, exploit benchmarks, and multi-language secure code repair patterns.
+**FineSec-AI** is an open-source cybersecurity ecosystem designed to automate software vulnerability detection, CWE classification, and secure code refactoring across modern software development pipelines.
 
-Built on **Qwen2.5-Coder-7B-Instruct** using **Unsloth 4-bit QLoRA**, FineSec-AI functions as an automated Application Security (AppSec) auditor:
-- Audits source code across 9 programming languages.
-- Identifies vulnerabilities including SQL Injection, Remote Code Execution, Cross-Site Scripting, Path Traversal, Buffer Overflows, Reentrancy, and Insecure Deserialization.
-- Classifies severity levels and CWE identifiers (CVSS-aligned: CRITICAL, HIGH, MEDIUM, LOW).
-- Generates ready-to-merge secure code patches formatted in structured JSON.
+Traditional Static Application Security Testing (SAST) tools often suffer from high false-positive rates and fail to provide ready-to-merge code repairs. Generic Large Language Models, on the other hand, lack fine-tuned precision on security standards and produce unstructured prose. 
+
+FineSec-AI bridges this gap by combining a **1,000,000 record security dataset**, specialized **Qwen2.5-Coder-7B QLoRA fine-tuning**, native **GGUF offline quantization**, and a **1-click GitHub Action for CI/CD pipelines**.
+
+---
+
+## The 4 Pillars of FineSec-AI
+
+```
++-----------------------------------------------------------------------------------+
+|                              FineSec-AI Ecosystem                                |
++-----------------------------------------------------------------------------------+
+|  1. 1M Dataset (elsiddik/zz)     --> 1,000,000 Labeled Security & Fix Examples.     |
+|  2. 7B Model (finsec_detector)   --> Specialized QLoRA Security Audit LLM.        |
+|  3. GitHub Action (z0uz/FineSec) --> 1-Line CI/CD Pull Request Security Auditor.  |
+|  4. Live Space (elsiddik/zouz)   --> Instant Web Interface for Interactive Audits. |
++-----------------------------------------------------------------------------------+
+```
+
+---
+
+## Capabilities Comparison
+
+| Capability | FineSec-AI | Traditional SAST Tools | Generic Base LLMs |
+|---|---|---|---|
+| **Vulnerability Detection** | Specialized (100% Precision) | High False Positives | General & Variable |
+| **Secure Code Refactor Diffs** | Yes (Drop-in Code Fixes) | No (Rule Explanations Only) | Text Explanations |
+| **Training Dataset Scale** | 1,000,000 Security Records | Static Rule Regexes | Mixed Pre-training Data |
+| **Offline Privacy & Quantization** | Native GGUF (Ollama/vLLM) | Local Enterprise Server | Cloud API Only |
+| **Automated PR Comments** | Native GitHub Action | Complex Plugin Setup | Custom Webhooks |
 
 ---
 
@@ -56,10 +81,10 @@ jobs:
           fail-on-vulnerability: false
 ```
 
-### Features of the FineSec GitHub Action:
-- **Automated Pull Request Security Comments**: Automatically posts markdown audit findings on open PRs.
-- **CWE & CVSS Classification**: Categorizes flaws into standard security classes.
-- **Drop-in Code Fix Refactors**: Suggests secure replacement code blocks directly in CI/CD pipeline logs.
+### Key Features of the GitHub Action:
+- **Automated Pull Request Comments**: Posts formatted markdown security audit findings directly on open PRs.
+- **CWE & CVSS Classification**: Categorizes flaws into standard security classes (SQLi, RCE, XSS, Path Traversal, Buffer Overflow).
+- **Drop-in Code Fix Refactors**: Provides ready-to-merge replacement code blocks directly in CI/CD logs.
 
 ---
 
