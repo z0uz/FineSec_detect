@@ -1,0 +1,30 @@
+name: 'FineSec Security Auditor'
+description: 'Automated AI-powered Application Security audit for code pushes and pull requests.'
+author: 'Zaher Elsiddik'
+branding:
+  icon: 'shield'
+  color: 'red'
+
+inputs:
+  github-token:
+    description: 'GitHub Token for posting pull request security comments'
+    required: false
+    default: '${{ github.token }}'
+  path:
+    description: 'Directory or file path to audit'
+    required: false
+    default: '.'
+  fail-on-vulnerability:
+    description: 'Whether to fail the CI/CD pipeline step if vulnerabilities are found'
+    required: false
+    default: 'false'
+
+outputs:
+  vulnerabilities-found:
+    description: 'Number of high-risk security vulnerabilities detected'
+  report-json:
+    description: 'Structured JSON security audit report'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

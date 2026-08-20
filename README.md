@@ -6,11 +6,11 @@
 
 [![Hugging Face Model](https://img.shields.io/badge/Hugging%20Face-FineSec--Detector-blue.svg)](https://huggingface.co/elsiddik/finsec_detector)
 [![Hugging Face Space](https://img.shields.io/badge/Live%20Demo-Gradio%20Space-red.svg)](https://huggingface.co/spaces/elsiddik/zouz)
+[![Hugging Face Dataset](https://img.shields.io/badge/Hugging%20Face-1M--Dataset-yellow.svg)](https://huggingface.co/datasets/elsiddik/zz)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-green.svg)](LICENSE)
 [![Framework: PyTorch & Unsloth](https://img.shields.io/badge/Framework-PyTorch%20%7C%20Unsloth-orange.svg)](https://github.com/unslothai/unsloth)
-[![Model Size: 7B Parameters](https://img.shields.io/badge/Model-Qwen2.5--Coder--7B-purple.svg)](https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct)
 
-[Live Demo](https://huggingface.co/spaces/elsiddik/zouz) | [Hugging Face Model](https://huggingface.co/elsiddik/finsec_detector) | [Model v2 (212k Dataset)](https://huggingface.co/elsiddik/finsec_detector-v2) | [Documentation](#quickstart-inference)
+[Live Demo](https://huggingface.co/spaces/elsiddik/zouz) | [1M Dataset](https://huggingface.co/datasets/elsiddik/zz) | [Hugging Face Model](https://huggingface.co/elsiddik/finsec_detector) | [Model v2 (212k Dataset)](https://huggingface.co/elsiddik/finsec_detector-v2) | [Documentation](#quickstart-inference)
 
 </div>
 
@@ -18,7 +18,7 @@
 
 ## Overview
 
-**FineSec-AI** is a 7-Billion parameter specialized cybersecurity Large Language Model fine-tuned on **212,759 high-precision security records**, NVD CVE vulnerability advisories, exploit benchmarks, and multi-language secure code repair patterns.
+**FineSec-AI** is a 7-Billion parameter specialized cybersecurity Large Language Model fine-tuned on **1,000,000 high-precision security records**, NVD CVE vulnerability advisories, exploit benchmarks, and multi-language secure code repair patterns.
 
 Built on **Qwen2.5-Coder-7B-Instruct** using **Unsloth 4-bit QLoRA**, FineSec-AI functions as an automated Application Security (AppSec) auditor:
 - Audits source code across 9 programming languages.
@@ -28,11 +28,46 @@ Built on **Qwen2.5-Coder-7B-Instruct** using **Unsloth 4-bit QLoRA**, FineSec-AI
 
 ---
 
+## GitHub Action CI/CD Integration
+
+Automate security audits on every Push and Pull Request in **1 line of YAML**:
+
+```yaml
+# .github/workflows/security-audit.yml
+name: FineSec Security Audit Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run FineSec AI Security Auditor
+        uses: z0uz/FineSec_detect@main
+        with:
+          path: '.'
+          fail-on-vulnerability: false
+```
+
+### Features of the FineSec GitHub Action:
+- **Automated Pull Request Security Comments**: Automatically posts markdown audit findings on open PRs.
+- **CWE & CVSS Classification**: Categorizes flaws into standard security classes.
+- **Drop-in Code Fix Refactors**: Suggests secure replacement code blocks directly in CI/CD pipeline logs.
+
+---
+
 ## Technical Highlights
 
 | Feature | Technical Specification |
 |---|---|
-| Dataset Scale | 212,759 security records (112,759 NVD CVE advisories + 100,000 multi-language code pairs). |
+| Dataset Scale | 1,000,000 security records (500,000 vulnerable code snippets + 500,000 safe control examples). |
 | Precision Rating | 100.0% precision on safe code control benchmarks with 0% false positives. |
 | Multi-Language Support | Audits Python, C, C++, JavaScript, TypeScript, Go, Java, PHP, Bash, and Solidity. |
 | Offline Quantization | Exported in GGUF (Q4_K_M) format for offline execution via Ollama and LM Studio. |
@@ -56,7 +91,7 @@ Evaluating **FineSec-AI** across multi-language vulnerability benchmarks yielded
 
 ```mermaid
 flowchart TD
-    A[Source Code Input] --> B[FineSec System Prompt & Tokenizer]
+    A[Source Code Input / Pull Request] --> B[FineSec System Prompt & Tokenizer]
     B --> C[Qwen2.5-Coder-7B + Unsloth QLoRA]
     C --> D{Vulnerability Analysis}
     D -->|Vulnerable| E[Extract CWE ID & CVSS Severity]
@@ -67,7 +102,7 @@ flowchart TD
     F --> I
     G --> I
     H --> I
-    I --> J[CI/CD Pipeline Integration]
+    I --> J[GitHub Action PR Security Comment]
 ```
 
 ---
@@ -138,14 +173,17 @@ ollama run hf.co/elsiddik/finsec_detector-GGUF
 
 ```
 FineSec_detect/
+├── action.yml                    # FineSec GitHub Action Manifest
+├── Dockerfile                    # Container Runner for CI/CD Pipeline
+├── action/
+│   └── entrypoint.py             # GitHub Action Security Audit & PR Commenter
 ├── ai/
 │   ├── train_unsloth_7b.ipynb    # Fine-Tuning Notebook for Kaggle / Colab
 │   ├── generate_ultra_dataset.py # 212,759 Sample Dataset Synthesizer
-│   ├── evaluate_model.py         # Multi-Language Benchmark Evaluation Suite
-│   ├── inference_deepseek.py     # Local & API Model Tester
-│   └── MODEL_CARD.md             # Model Card Specifications
+│   ├── dataset_expansion_tool.py # 1,000,000 Sample Dataset Synthesizer
+│   └── evaluate_model.py         # Multi-Language Benchmark Evaluation Suite
 ├── data/
-│   └── training_data_200k.jsonl  # 212,759 Security Records (286 MB)
+│   └── custom_expansion.jsonl    # 1,000,000 Security Records (1.11 GB)
 ├── web_demo/
 │   ├── app.py                    # Interactive Gradio Web Dashboard
 │   └── requirements.txt          # Demo Dependencies
