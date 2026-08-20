@@ -14,6 +14,7 @@ import json
 import random
 import argparse
 import pandas as pd
+import urllib.request
 
 SYSTEM_PROMPT = (
     "You are FineSec-AI, an expert Application Security Engineer. "
@@ -87,10 +88,17 @@ TABLES = ["users", "accounts", "payments", "logs", "transactions", "permissions"
 COLS = ["id", "username", "email", "status", "role", "access_key"]
 
 def load_all_parquet_cves(parquet_path: str) -> list:
-    """Load ALL CVE records from parquet database"""
+    """Load ALL CVE records from parquet database, downloading if missing"""
     if not os.path.exists(parquet_path):
-        print(f"⚠️ Parquet file not found at {parquet_path}")
-        return []
+        print(f"📦 Downloading NVD Parquet database to {parquet_path}...")
+        os.makedirs(os.path.dirname(parquet_path), exist_ok=True)
+        url = "https://huggingface.co/datasets/elsiddik/zz/resolve/main/train-00000-of-00001.parquet"
+        try:
+            urllib.request.urlretrieve(url, parquet_path)
+            print("✅ Downloaded NVD Parquet database!")
+        except Exception as e:
+            print(f"⚠️ Parquet file not available: {e}")
+            return []
     
     print(f"📦 Extracting ALL CVE records from {parquet_path}...")
     df = pd.read_parquet(parquet_path)
